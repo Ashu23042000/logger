@@ -7,7 +7,7 @@ import (
 func main() {
 
 	// file, _ := os.OpenFile("logs.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-	log := logger.New(nil)
+	log := logger.New(nil, "DEBUg ")
 
 	log.Debug("Hello Bhai")
 	log.Debugf("%s %d", "Hello bhai", 23)
