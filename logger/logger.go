@@ -38,8 +38,8 @@ Parameters:
 
 Returns:
   - ILogger: An instance of a Logger that supports different log levels (debug, info, warn, error). The log messages
-             are formatted in JSON and can be written to the specified file and standard output, or just standard output
-             if no file is provided.
+    are formatted in JSON and can be written to the specified file and standard output, or just standard output
+    if no file is provided.
 */
 func New(file *os.File, level string) ILogger {
 	var output io.Writer
@@ -84,20 +84,20 @@ func (l *Logger) Debugf(s string, args ...interface{}) {
 
 // Warn
 func (l *Logger) Warn(msg string) {
-	l.warn.Warn(msg)
+	l.warn.Warn(msg, slog.String("file", getCallerFile()))
 }
 
 func (l *Logger) Warnf(s string, args ...interface{}) {
 	output := fmt.Sprintf(s, args...)
-	l.warn.Warn(output)
+	l.warn.Warn(output, slog.String("file", getCallerFile()))
 }
 
 // Error
 func (l *Logger) Error(msg string) {
-	l.err.Error(msg)
+	l.err.Error(msg, slog.String("file", getCallerFile()))
 }
 
 func (l *Logger) Errorf(s string, args ...interface{}) {
 	output := fmt.Sprintf(s, args...)
-	l.err.Error(output)
+	l.err.Error(output, slog.String("file", getCallerFile()))
 }
