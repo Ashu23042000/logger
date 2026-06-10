@@ -71,33 +71,33 @@ func (l *Logger) Infof(s string, args ...interface{}) {
 // Debug
 func (l *Logger) Debug(msg string) {
 	if l.level == constant.DEBUG {
-		l.debug.Debug(msg, slog.String("file", getCallerFile()))
+		l.debug.Debug(msg, slog.String(constant.FILE, getCallerFile()))
 	}
 }
 
 func (l *Logger) Debugf(s string, args ...interface{}) {
 	if l.level == constant.DEBUG {
 		output := fmt.Sprintf(s, args...)
-		l.debug.Debug(output, slog.String("file", getCallerFile()))
+		l.debug.Debug(output, slog.String(constant.FILE, getCallerFile()))
 	}
 }
 
 // Warn
 func (l *Logger) Warn(msg string) {
-	l.warn.Warn(msg, slog.String("file", getCallerFile()))
+	l.warn.Warn(msg, slog.String(constant.FILE, getCallerFile()))
 }
 
 func (l *Logger) Warnf(s string, args ...interface{}) {
 	output := fmt.Sprintf(s, args...)
-	l.warn.Warn(output, slog.String("file", getCallerFile()))
+	l.warn.Warn(output, slog.String(constant.FILE, getCallerFile()))
 }
 
 // Error
 func (l *Logger) Error(msg string) {
-	l.err.Error(msg, slog.String("file", getCallerFile()))
+	l.err.Error(msg, slog.String(constant.FILE, getCallerFile()))
 }
 
 func (l *Logger) Errorf(s string, args ...interface{}) {
 	output := fmt.Sprintf(s, args...)
-	l.err.Error(output, slog.String("file", getCallerFile()))
+	l.err.Error(output, slog.String(constant.FILE, getCallerFile()))
 }
