@@ -1,3 +1,3 @@
-module github.com/Ashu23042000/logger
+module github.com/sagargaikwad2000/logger
 
 go 1.18

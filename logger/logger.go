@@ -1,103 +1,100 @@
 package logger
 
 import (
-	"fmt"
+	"context"
 	"io"
 	"log/slog"
 	"os"
 	"strings"
-
-	"github.com/Ashu23042000/logger/constant"
 )
 
 type ILogger interface {
-	Debug(string)
-	Debugf(string, ...interface{})
-	Info(string)
-	Infof(string, ...interface{})
-	Warn(string)
-	Warnf(string, ...interface{})
-	Error(string)
-	Errorf(string, ...interface{})
+	Debug(msg string, args ...any)
+	Info(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
+
+	DebugContext(ctx context.Context, msg string, args ...any)
+	InfoContext(ctx context.Context, msg string, args ...any)
+	WarnContext(ctx context.Context, msg string, args ...any)
+	ErrorContext(ctx context.Context, msg string, args ...any)
 }
 
 type Logger struct {
-	debug *slog.Logger
-	info  *slog.Logger
-	warn  *slog.Logger
-	err   *slog.Logger
-	level string
+	logger *slog.Logger
 }
 
-/*
-New creates a new instance of ILogger with specified log level and output file.
-
-Parameters:
-  - file: An optional *os.File to write log output to. If nil, logs are only written to standard output.
-  - level: A string representing the desired log level. This should be one of "debug", "info", "warn", or "error".
-
-Returns:
-  - ILogger: An instance of a Logger that supports different log levels (debug, info, warn, error). The log messages
-    are formatted in JSON and can be written to the specified file and standard output, or just standard output
-    if no file is provided.
-*/
 func New(file *os.File, level string) ILogger {
 	var output io.Writer
+
 	if file != nil {
 		output = io.MultiWriter(file, os.Stdout)
 	} else {
 		output = os.Stdout
 	}
 
-	debugLogger := slog.New(slog.NewJSONHandler(output, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	infoLogger := slog.New(slog.NewJSONHandler(output, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	warnLogger := slog.New(slog.NewJSONHandler(output, &slog.HandlerOptions{Level: slog.LevelWarn}))
-	errorLogger := slog.New(slog.NewJSONHandler(output, &slog.HandlerOptions{Level: slog.LevelError}))
-	level = strings.TrimSpace(strings.ToLower(level))
+	var slogLevel slog.Level
 
-	return &Logger{debugLogger, infoLogger, warnLogger, errorLogger, level}
-}
+	switch strings.ToLower(strings.TrimSpace(level)) {
+	case "debug":
+		slogLevel = slog.LevelDebug
 
-// Info
-func (l *Logger) Info(msg string) {
-	l.info.Info(msg)
-}
+	case "warn":
+		slogLevel = slog.LevelWarn
 
-func (l *Logger) Infof(s string, args ...interface{}) {
-	output := fmt.Sprintf(s, args...)
-	l.info.Info(output)
+	case "error":
+		slogLevel = slog.LevelError
+
+	default:
+		slogLevel = slog.LevelInfo
+	}
+
+	handler := slog.NewJSONHandler(output, &slog.HandlerOptions{
+		Level:     slogLevel,
+		AddSource: true,
+	})
+
+	return &Logger{
+		logger: slog.New(handler),
+	}
 }
 
 // Debug
-func (l *Logger) Debug(msg string) {
-	if l.level == constant.DEBUG {
-		l.debug.Debug(msg, slog.String(constant.FILE, getCallerFile()))
-	}
+
+func (l *Logger) Debug(msg string, args ...any) {
+	l.logger.Debug(msg, args...)
 }
 
-func (l *Logger) Debugf(s string, args ...interface{}) {
-	if l.level == constant.DEBUG {
-		output := fmt.Sprintf(s, args...)
-		l.debug.Debug(output, slog.String(constant.FILE, getCallerFile()))
-	}
+func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
+	l.logger.DebugContext(ctx, msg, args...)
+}
+
+// Info
+
+func (l *Logger) Info(msg string, args ...any) {
+	l.logger.Info(msg, args...)
+}
+
+func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
+	l.logger.InfoContext(ctx, msg, args...)
 }
 
 // Warn
-func (l *Logger) Warn(msg string) {
-	l.warn.Warn(msg, slog.String(constant.FILE, getCallerFile()))
+
+func (l *Logger) Warn(msg string, args ...any) {
+	l.logger.Warn(msg, args...)
 }
 
-func (l *Logger) Warnf(s string, args ...interface{}) {
-	output := fmt.Sprintf(s, args...)
-	l.warn.Warn(output, slog.String(constant.FILE, getCallerFile()))
+func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
+	l.logger.WarnContext(ctx, msg, args...)
 }
 
 // Error
-func (l *Logger) Error(msg string) {
-	l.err.Error(msg, slog.String(constant.FILE, getCallerFile()))
+
+func (l *Logger) Error(msg string, args ...any) {
+	l.logger.Error(msg, args...)
 }
 
-func (l *Logger) Errorf(s string, args ...interface{}) {
-	output := fmt.Sprintf(s, args...)
-	l.err.Error(output, slog.String(constant.FILE, getCallerFile()))
+func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
+	l.logger.ErrorContext(ctx, msg, args...)
 }
