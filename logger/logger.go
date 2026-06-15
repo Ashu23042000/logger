@@ -1,11 +1,12 @@
 package logger
 
 import (
-	"context"
 	"io"
 	"log/slog"
 	"os"
 	"strings"
+
+	"github.com/sagargaikwad2000/logger/constant"
 )
 
 type ILogger interface {
@@ -13,18 +14,13 @@ type ILogger interface {
 	Info(msg string, args ...any)
 	Warn(msg string, args ...any)
 	Error(msg string, args ...any)
-
-	DebugContext(ctx context.Context, msg string, args ...any)
-	InfoContext(ctx context.Context, msg string, args ...any)
-	WarnContext(ctx context.Context, msg string, args ...any)
-	ErrorContext(ctx context.Context, msg string, args ...any)
 }
 
 type Logger struct {
 	logger *slog.Logger
 }
 
-func New(file *os.File, level string) ILogger {
+func New(file *os.File, level string, enableFileSource bool) ILogger {
 	var output io.Writer
 
 	if file != nil {
@@ -36,13 +32,13 @@ func New(file *os.File, level string) ILogger {
 	var slogLevel slog.Level
 
 	switch strings.ToLower(strings.TrimSpace(level)) {
-	case "debug":
+	case constant.DEBUG:
 		slogLevel = slog.LevelDebug
 
-	case "warn":
+	case constant.WARN:
 		slogLevel = slog.LevelWarn
 
-	case "error":
+	case constant.ERROR:
 		slogLevel = slog.LevelError
 
 	default:
@@ -51,7 +47,7 @@ func New(file *os.File, level string) ILogger {
 
 	handler := slog.NewJSONHandler(output, &slog.HandlerOptions{
 		Level:     slogLevel,
-		AddSource: true,
+		AddSource: enableFileSource,
 	})
 
 	return &Logger{
@@ -65,18 +61,10 @@ func (l *Logger) Debug(msg string, args ...any) {
 	l.logger.Debug(msg, args...)
 }
 
-func (l *Logger) DebugContext(ctx context.Context, msg string, args ...any) {
-	l.logger.DebugContext(ctx, msg, args...)
-}
-
 // Info
 
 func (l *Logger) Info(msg string, args ...any) {
 	l.logger.Info(msg, args...)
-}
-
-func (l *Logger) InfoContext(ctx context.Context, msg string, args ...any) {
-	l.logger.InfoContext(ctx, msg, args...)
 }
 
 // Warn
@@ -85,16 +73,8 @@ func (l *Logger) Warn(msg string, args ...any) {
 	l.logger.Warn(msg, args...)
 }
 
-func (l *Logger) WarnContext(ctx context.Context, msg string, args ...any) {
-	l.logger.WarnContext(ctx, msg, args...)
-}
-
 // Error
 
 func (l *Logger) Error(msg string, args ...any) {
 	l.logger.Error(msg, args...)
-}
-
-func (l *Logger) ErrorContext(ctx context.Context, msg string, args ...any) {
-	l.logger.ErrorContext(ctx, msg, args...)
 }
